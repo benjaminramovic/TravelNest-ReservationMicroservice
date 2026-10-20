@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reservation;
+use App\Services\RabbitMQ\ReservationPublisher;
 
 class ReservationController extends Controller
 {
@@ -20,10 +21,13 @@ class ReservationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ReservationPublisher $publisher)
     {
         //
             $reservation = Reservation::create($request->all());
+
+            $publisher->publishReservationCreated($reservation);
+
             return response()->json($reservation, 201);
     }
 
@@ -57,7 +61,7 @@ class ReservationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ReservationPublisher $publisher)
     {
         //
         $reservation = Reservation::find($id);
@@ -65,6 +69,8 @@ class ReservationController extends Controller
             return response()->json(['message' => 'Reservation not found'], 404);
         }
         $reservation->delete();
+        $publisher->publishReservationCanceled($reservation);
+
         return response()->json(['message' => 'Reservation deleted successfully']);
     }
 }

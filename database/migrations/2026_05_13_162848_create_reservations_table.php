@@ -16,6 +16,7 @@ return new class extends Migration
             
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('accommodation_id');
+            $table->unsignedInteger('room_id')->nullable();
             $table->date('start_date');
             $table->date('end_date');
             $table->string('status')->default('pending');
